@@ -25,6 +25,9 @@ const storage = diskStorage({
 const upload = multer({ storage: storage })
 
 
+const targetWidth = 1200;
+const targetHeight = 800;
+
 const generateFileName = () => {
     const currentDate = new Date();
     const year = currentDate.getFullYear();
@@ -55,6 +58,21 @@ app.post('/upload', upload.single('file'), async (req, res) => {
     }
 
     const newFileName = generateFileName()
+
+    sharp(`${file.path}`)
+        .rotate()
+        .resize(1200, 800, {
+            fit: 'inside', // Maintain aspect ratio, do not crop
+            withoutEnlargement: true // Do not enlarge the image if its dimensions are already less than target
+        })
+        .jpeg({ quality: 90 }) // set JPEG quality to 80%
+        .toFile(`uploads/${newFileName}.jpg`, (err, info) => {
+            if (err) {
+                console.error(err);
+            } else {
+                console.log(info);
+            }
+        });
 
 
     // const files = await imagemin([`${file.path}`], {
